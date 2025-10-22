@@ -2,6 +2,7 @@
 # Assignment 5, Question 2: Python Data Processing
 # Process configuration files for data generation.
 
+#!/usr/bin/env python3
 
 def parse_config(filepath: str) -> dict:
     """
@@ -18,6 +19,7 @@ def parse_config(filepath: str) -> dict:
         >>> config['sample_data_rows']
         '100'
     """
+    
     # TODO: Read file, split on '=', create dict
     pass
 
