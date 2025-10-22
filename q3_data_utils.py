@@ -4,6 +4,7 @@
 #
 # These utilities will be imported and used in Q4-Q7 notebooks.
 
+#!/usr/bin/env python3
 import pandas as pd
 import numpy as np
 
@@ -23,7 +24,10 @@ def load_data(filepath: str) -> pd.DataFrame:
         >>> df.shape
         (10000, 18)
     """
-    pass
+    df = pd.read_csv(filepath)
+    
+    return df
+
 
 
 def clean_data(df: pd.DataFrame, remove_duplicates: bool = True,
@@ -42,7 +46,10 @@ def clean_data(df: pd.DataFrame, remove_duplicates: bool = True,
     Example:
         >>> df_clean = clean_data(df, sentinel_value=-999)
     """
-    pass
+    df.drop_duplicates(inplace=True)
+    df.replace(sentinel_value, np.nan, inplace = True)
+
+    return df
 
 
 def detect_missing(df: pd.DataFrame) -> pd.Series:
@@ -60,7 +67,9 @@ def detect_missing(df: pd.DataFrame) -> pd.Series:
         >>> missing['age']
         15
     """
-    pass
+    missing_count = df.isnull().sum()
+
+    return missing_count
 
 
 def fill_missing(df: pd.DataFrame, column: str, strategy: str = 'mean') -> pd.DataFrame:
@@ -78,7 +87,8 @@ def fill_missing(df: pd.DataFrame, column: str, strategy: str = 'mean') -> pd.Da
     Example:
         >>> df_filled = fill_missing(df, 'age', strategy='median')
     """
-    pass
+    df[column].fillna(df[column].median(), inplace = True)
+    return df
 
 
 def filter_data(df: pd.DataFrame, filters: list) -> pd.DataFrame:
@@ -111,7 +121,19 @@ def filter_data(df: pd.DataFrame, filters: list) -> pd.DataFrame:
         >>> filters = [{'column': 'age', 'condition': 'in_range', 'value': [18, 65]}]
         >>> df_filtered = filter_data(df, filters)
     """
-    pass
+    for f in filters:
+        column, condition, value = f["column"], f["condition"], f["value"]
+
+        if condition == "equals":
+            df = df[column == value]
+        elif condition == "greater_than":
+            df = df[column > value]
+        elif condition == "less_than":
+            df = df[column < value]
+        elif condition == "in_range":
+            df = df[(df[column] >= value[0]) & (df[column] <= value[1])]
+        elif condition == "in_list":
+            df = df[df[column].isin(value)]
 
 
 def transform_types(df: pd.DataFrame, type_map: dict) -> pd.DataFrame:
@@ -134,7 +156,17 @@ def transform_types(df: pd.DataFrame, type_map: dict) -> pd.DataFrame:
         ... }
         >>> df_typed = transform_types(df, type_map)
     """
-    pass
+
+    for column, target_type in type_map.items():
+        if target_type == "datetime":
+            df[column] = pd.to_datetime(df[column])
+        elif target_type == "numeric":
+            df[column] = pd.to_numeric(df[column])
+        elif target_type == "category":
+            df[column] = df[column].astype('category')
+        elif target_type == "string":
+            df[column] = df[column].astype(str)
+    return df
 
 
 def create_bins(df: pd.DataFrame, column: str, bins: list,
@@ -160,7 +192,14 @@ def create_bins(df: pd.DataFrame, column: str, bins: list,
         ...     labels=['<18', '18-34', '35-49', '50-64', '65+']
         ... )
     """
-    pass
+    df[new_column] = pd.cut(
+        df[column],
+        bins=bins,
+        labels=labels,
+        include_lowest= True
+    )
+
+    return df
 
 
 def summarize_by_group(df: pd.DataFrame, group_col: str,
@@ -188,7 +227,12 @@ def summarize_by_group(df: pd.DataFrame, group_col: str,
         ...     {'age': ['mean', 'std'], 'bmi': 'mean'}
         ... )
     """
-    pass
+    if agg_dict is None:
+        summary = df.groupby(group_col).describe()
+    else:
+        summary = df.groupby(group_col).agg(agg_dict)
+    
+    return summary
 
 
 
@@ -205,9 +249,9 @@ if __name__ == '__main__':
     print("  - transform_types()")
     print("  - create_bins()")
     print("  - summarize_by_group()")
-    
+
     # TODO: Add simple test example here
     # Example:
-    # test_df = pd.DataFrame({'age': [25, 30, 35], 'bmi': [22, 25, 28]})
-    # print("Test DataFrame created:", test_df.shape)
-    # print("Test detect_missing:", detect_missing(test_df))
+    #test_df = pd.DataFrame({'age': [25, 30, 35], 'bmi': [22, 25, 28]})
+    #print("Test DataFrame created:", test_df.shape)
+    #print("Test detect_missing:", detect_missing(test_df))
