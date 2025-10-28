@@ -5,3 +5,4 @@ source venv/bin/activate
 # Then install dependencies:
 pip install pandas
 pip install numpy
+pip install matplotlib
