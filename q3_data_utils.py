@@ -87,7 +87,15 @@ def fill_missing(df: pd.DataFrame, column: str, strategy: str = 'mean') -> pd.Da
     Example:
         >>> df_filled = fill_missing(df, 'age', strategy='median')
     """
-    df[column].fillna(df[column].median(), inplace = True)
+    if strategy == "mean":
+        df[column].fillna(df[column].mean(), inplace=True)
+    elif strategy == "median":
+        df[column].fillna(df[column].median(), inplace=True)
+    elif strategy == "ffill":
+        df[column].fillna(df[column].ffill(), inplace=True)
+    else:
+        raise ValueError(f"unknwn strategy: {strategy}")
+    
     return df
 
 
@@ -125,16 +133,17 @@ def filter_data(df: pd.DataFrame, filters: list) -> pd.DataFrame:
         column, condition, value = f["column"], f["condition"], f["value"]
 
         if condition == "equals":
-            df = df[column == value]
+            df = df[df[column] == value]
         elif condition == "greater_than":
-            df = df[column > value]
+            df = df[df[column] > value]
         elif condition == "less_than":
-            df = df[column < value]
+            df = df[df[column] < value]
         elif condition == "in_range":
             df = df[(df[column] >= value[0]) & (df[column] <= value[1])]
         elif condition == "in_list":
             df = df[df[column].isin(value)]
 
+    return df
 
 def transform_types(df: pd.DataFrame, type_map: dict) -> pd.DataFrame:
     """
@@ -192,6 +201,9 @@ def create_bins(df: pd.DataFrame, column: str, bins: list,
         ...     labels=['<18', '18-34', '35-49', '50-64', '65+']
         ... )
     """
+    if new_column is None:
+        new_column = f"{column}_binned"
+
     df[new_column] = pd.cut(
         df[column],
         bins=bins,
