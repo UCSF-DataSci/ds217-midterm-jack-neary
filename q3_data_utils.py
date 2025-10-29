@@ -167,17 +167,27 @@ def transform_types(df: pd.DataFrame, type_map: dict) -> pd.DataFrame:
         ... }
         >>> df_typed = transform_types(df, type_map)
     """
+    df_transformed = df.copy()
 
     for column, target_type in type_map.items():
-        if target_type == "datetime":
-            df[column] = pd.to_datetime(df[column])
-        elif target_type == "numeric":
-            df[column] = pd.to_numeric(df[column])
-        elif target_type == "category":
-            df[column] = df[column].astype('category')
-        elif target_type == "string":
-            df[column] = df[column].astype(str)
-    return df
+        if column not in df_transformed.columns:
+            raise ValueError(f"Column '{column}' not found in DataFrame.")
+
+        try:
+            if target_type == "datetime":
+                df_transformed[column] = pd.to_datetime(df_transformed[column], format='mixed', errors='coerce')
+            elif target_type == "numeric":
+                df_transformed[column] = pd.to_numeric(df_transformed[column], errors='coerce')
+            elif target_type == "category":
+                df_transformed[column] = df_transformed[column].astype('category')
+            elif target_type == "string":
+                df_transformed[column] = df_transformed[column].astype('string')
+            else:
+                raise ValueError(f"Unsupported type '{target_type}' for column '{column}'.")
+        except Exception as e:
+            raise ValueError(f"Failed to convert column '{column}' to {target_type}: {e}")
+
+    return df_transformed
 
 
 def create_bins(df: pd.DataFrame, column: str, bins: list,
