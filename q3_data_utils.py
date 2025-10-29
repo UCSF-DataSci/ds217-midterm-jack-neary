@@ -72,7 +72,7 @@ def detect_missing(df: pd.DataFrame) -> pd.Series:
     return missing_count
 
 
-def fill_missing(df: pd.DataFrame, column: str, strategy: str = 'mean') -> pd.DataFrame:
+def fill_missing(df: pd.DataFrame, columns: str, strategy: str = 'mean') -> pd.DataFrame:
     """
     Fill missing values in a column using specified strategy.
 
@@ -87,15 +87,17 @@ def fill_missing(df: pd.DataFrame, column: str, strategy: str = 'mean') -> pd.Da
     Example:
         >>> df_filled = fill_missing(df, 'age', strategy='median')
     """
-    if strategy == "mean":
-        df[column].fillna(df[column].mean(), inplace=True)
-    elif strategy == "median":
-        df[column].fillna(df[column].median(), inplace=True)
-    elif strategy == "ffill":
-        df[column].fillna(df[column].ffill(), inplace=True)
-    else:
-        raise ValueError(f"unknwn strategy: {strategy}")
-    
+    if isinstance(columns, str):
+        columns = [columns]
+    for column in columns:
+        if strategy == "mean":
+            df[column].fillna(df[column].mean(), inplace=True)
+        elif strategy == "median":
+            df[column].fillna(df[column].median(), inplace=True)
+        elif strategy == "ffill":
+            df[column] = df[column].ffill()
+        else:
+            raise ValueError(f"Unknown strategy: {strategy}")
     return df
 
 
