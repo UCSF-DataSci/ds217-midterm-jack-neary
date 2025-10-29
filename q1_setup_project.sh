@@ -1,10 +1,8 @@
-# TODO: Add shebang line: #!/bin/bash
+#!/bin/bash
 # Assignment 5, Question 1: Project Setup Script
 # This script creates the directory structure for the clinical trial analysis project
 # TODO: Make this script executable (if not already)
 
-#!/bin/bash
-chmod +x q1_setup_project.sh
 echo "setting up project..."
 
 # TODO: Create the following directories:
